@@ -1,0 +1,101 @@
+int cols, rows;
+float[][] rippleCurrent; //Buffer the current state of the water
+float[][] ripplePrevious; //Data from the previous Buffer frame
+float dampening = .99;
+//int underwaterDrift; //Xoffset for underwater oscillation effect
+PImage img;
+
+void settings() {
+  img=loadImage("cat.jpg");
+  size(img.width, img.height, P2D);
+  println("w="+img.width+", h="+img.height);
+}
+
+void setup() {
+  //size(600,400);
+  cols = width;
+  rows = height;
+  rippleCurrent = new float[cols][rows];
+  ripplePrevious = new float[cols][rows];
+
+  //Initialize the ripple array
+  /*for (int x = 1; x < cols-1; x++) {
+    for (int y = 1; y < rows-1; y++) {
+      rippleCurrent[x][y] = 0;
+      ripplePrevious[x][y] = 0; //for a trippy animation init with: img.get(x,y)
+    }
+  }*/
+  image(img, 0, 0);
+}
+
+void draw() {
+  
+  //if (random(1) > .92) rippleAt(random(2, width-2), random(2, height-2));
+
+  //Process Water Ripple
+  
+  for (int x = 1; x < cols-1; x++) {
+    for (int y = 1; y < rows-1; y++) {
+      rippleCurrent[x][y] = (
+        ripplePrevious[x-1][y] + 
+        ripplePrevious[x+1][y] +
+        ripplePrevious[x][y-1] + 
+        ripplePrevious[x][y+1])*.5 - rippleCurrent[x][y];
+      rippleCurrent[x][y] = rippleCurrent[x][y] * dampening;
+    }
+  }
+
+  //Rendering the Water Ripple with simple shading/refraction
+  //(this could be inside the Process Water Ripple loop for +speed, but for +sanity another loop)
+  loadPixels();
+  for (int x = 1; x < cols-1; x++) {
+    for (int y = 1; y < rows-1; y++) {
+
+      float Xoffset = rippleCurrent[x-1][y] - rippleCurrent[x+1][y];
+      float Yoffset = rippleCurrent[x][y-1] - rippleCurrent[x][y+1];
+
+      float Shading = (Xoffset+Yoffset)/2;//or it could be 'Xoffset' itself or 'Yoffset' or the biggest
+      
+      //if my potato computer was powerful, underwaterDrift should be calculated every cycle
+      //if (random(1) > .9) underwaterDrift = int(map(noise(x*.002, y*.001+frameCount*.015), 0, 1, -20,20));
+      
+      color texture = img.get(int(x+Xoffset), int(y+Yoffset));
+      color pixel = texture + (int)Shading;
+
+      int index = x + y * cols;
+      pixels[index] = pixel;
+    }
+  }
+  
+  updatePixels();
+  
+  //Swap the buffers
+  float[][] temp = ripplePrevious;
+  ripplePrevious = rippleCurrent;
+  rippleCurrent = temp;
+  
+}
+
+/*void rippleAt(float x_, float y_) {
+  int x0 = (int)x_;
+  int y0 = (int)y_;
+  int peakValue = (int)random(100, width|height);
+  int radius = round(random(5, 10));
+
+  for (int x = x0-radius; x < x0+radius; x+=2) {
+    if (x < 1 || x > width-1) continue;
+    for (int y = y0-radius; y < y0+radius; y+=2) {
+      float distance = dist(x0, y0, x, y);
+      if (y < 1 || y > height-1 || distance > radius) continue;
+      ripplePrevious[x][y] = map(distance, 0, radius, peakValue/2, peakValue);
+    }
+  }
+}*/
+
+/*void mousePressed() {
+  rippleAt(mouseX, mouseY);
+}*/
+
+void mousePressed() {
+  rippleCurrent[mouseX][mouseY] = 50;
+}
