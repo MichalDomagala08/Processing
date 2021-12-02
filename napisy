@@ -1,0 +1,27 @@
+Table table;
+int trows = 0, tcols;
+float x_pos=0, y_pos=0;
+int r=1;
+
+void setup() {
+  table=loadTable("drinks.csv");
+  fullScreen();
+  frameRate(5);
+}
+
+void draw() {
+  background(250);
+  get_Table();
+  r++;
+}
+
+void get_Table() {
+  trows = table.getRowCount();
+  tcols = table.getColumnCount();
+  fill(0);
+  int dy =0;
+  //for ( int r = 1; r < trows; r++) {
+  TableRow thisrow = table.getRow(r);
+  for ( int c = 0; c < tcols; c++ ) text( thisrow.getString(c), x_pos = 10+30*c, y_pos = 10+15*dy );
+  dy++;
+}
