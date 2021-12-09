@@ -1,27 +1,38 @@
 Table table;
-int trows = 0, tcols;
-float x_pos=0, y_pos=0;
-int r=1;
+int trows;
+float x_pos=40, y_pos=40;
+int rows=1;
+PFont main_font, bold_font;
 
 void setup() {
-  table=loadTable("drinks.csv");
+  main_font = createFont("Roboto_reg.ttf", 14);
+  bold_font = createFont("Roboto.ttf", 14);
+  background(250);
+  table=loadTable("country-capitals.csv");
   fullScreen();
-  frameRate(5);
+  frameRate(20);
 }
 
 void draw() {
-  background(250);
   get_Table();
-  r++;
+  rows++;
+  y_pos = y_pos +20;
+  if (y_pos > height) {
+    //background(250);
+    fill(250);
+    noStroke();
+    rect(0, 0, 280, height);
+    y_pos = 40;
+  }
+  if (rows == trows) {
+    rows=1;
+  }
 }
 
 void get_Table() {
   trows = table.getRowCount();
-  tcols = table.getColumnCount();
-  fill(0);
-  int dy =0;
-  //for ( int r = 1; r < trows; r++) {
-  TableRow thisrow = table.getRow(r);
-  for ( int c = 0; c < tcols; c++ ) text( thisrow.getString(c), x_pos = 10+30*c, y_pos = 10+15*dy );
-  dy++;
+  TableRow thisrow = table.getRow(rows);
+  fill(50);
+  textFont(main_font);
+  text(thisrow.getString(0)+"  "+thisrow.getString(7), x_pos, y_pos);
 }
